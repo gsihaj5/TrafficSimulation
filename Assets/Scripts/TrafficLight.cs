@@ -5,6 +5,9 @@ using UnityEngine;
 
 public class TrafficLight : MonoBehaviour
 {
+    [SerializeField] private float intervalHorizontal;
+    [SerializeField] private float intervalVertical;
+    private bool isHorizontal;
     private float interval;
     private float elapsedTime;
 
@@ -22,7 +25,8 @@ public class TrafficLight : MonoBehaviour
     void Start()
     {
         elapsedTime = 0;
-        interval = 3;
+        interval = intervalHorizontal;
+        isHorizontal = true;
     }
 
     // Update is called once per frame
@@ -36,7 +40,20 @@ public class TrafficLight : MonoBehaviour
         UpdateColor(LightRight, _right);
         if (elapsedTime > interval)
         {
-            elapsedTime -= interval;
+            if (isHorizontal)
+            {
+                interval = intervalVertical;
+                isHorizontal = false;
+            }
+            else
+            {
+
+                interval = intervalHorizontal;
+                isHorizontal = true;
+            }
+
+            elapsedTime = 0;
+
 
             _top = !_top;
             _bottom = !_bottom;
