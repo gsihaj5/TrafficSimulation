@@ -5,51 +5,39 @@ using UnityEngine;
 
 public class Car : MonoBehaviour
 {
-    private bool _isAccelerating;
-    private bool _collidingWithCar;
+    private bool isStopped = false;
+    [SerializeField] private float detectionDistance = 2f;
 
     [SerializeField] private GameObject CarGameObject;
     private Rigidbody2D _rigidbody2D;
 
     [SerializeField] private float maxSpeed = 0;
     public Vector2 direction;
-    [SerializeField] private float acceleration = 1;
-    [SerializeField] private float deceleration = 2.5f;
+    [SerializeField] private float brakePower = 5f;
 
     private TrafficLight _trafficLight;
+    public LayerMask obstacleLayer;
+    public Transform frontSensor;
 
     // Start is called before the first frame update
     void Start()
     {
         _rigidbody2D = CarGameObject.GetComponent<Rigidbody2D>();
-        _isAccelerating = true;
-        _collidingWithCar = false;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (_isAccelerating)
+        if (CheckPermission() && !CheckFrontCar())
         {
-            if (_rigidbody2D.velocity.magnitude < maxSpeed)
-            {
-                float deltaSpeed = (acceleration * Time.deltaTime);
-                _rigidbody2D.velocity += new Vector2(direction.x * deltaSpeed, direction.y * deltaSpeed);
-            }
+            //accelerate
+            _rigidbody2D.velocity += direction * maxSpeed * Time.deltaTime;
+            _rigidbody2D.velocity = Vector3.ClampMagnitude(_rigidbody2D.velocity, maxSpeed);
         }
         else
         {
-            if (_trafficLight != null) CheckPermission();
-            if (_rigidbody2D.velocity.magnitude > 0.2f)
-            {
-                float deltaSpeed = (deceleration * Time.deltaTime);
-
-                _rigidbody2D.velocity -= new Vector2(direction.x * deltaSpeed, direction.y * deltaSpeed);
-            }
-            else
-            {
-                _rigidbody2D.velocity = new Vector2();
-            }
+            //decelerate
+            _rigidbody2D.velocity -= _rigidbody2D.velocity.normalized * brakePower * Time.deltaTime;
         }
     }
 
@@ -57,48 +45,49 @@ public class Car : MonoBehaviour
     {
         if (col.CompareTag("TrafficCollider"))
         {
-            if (!_collidingWithCar)
-            {
-                _trafficLight = col.transform.parent.GetComponent<TrafficLight>();
-                CheckPermission();
-            }
-            else
-            {
-                _isAccelerating = false;
-            }
+            _trafficLight = col.transform.parent.GetComponent<TrafficLight>();
         }
-        if(col.CompareTag("FrontCar")) Debug.Log("BABLAS");
     }
 
-    private void OnTriggerStay2D(Collider2D other)
+    private void OnTriggerExit2D(Collider2D col)
     {
-        if (other.CompareTag("Car"))
+        if (col.CompareTag("TrafficCollider"))
         {
-            _isAccelerating = false;
-            _collidingWithCar = true;
-            Debug.Log("collide with car should be decelerating");
+            _trafficLight = null;
         }
     }
 
-
-    private void CheckPermission()
+    private bool CheckPermission()
     {
+        if (_trafficLight == null) return true;
         if (direction.y > 0)
-            _isAccelerating = _trafficLight.GetPermission("top");
+            return _trafficLight.GetPermission("top");
         if (direction.y < 0)
-            _isAccelerating = _trafficLight.GetPermission("bottom");
+            return _trafficLight.GetPermission("bottom");
         if (direction.x < 0)
-            _isAccelerating = _trafficLight.GetPermission("left");
+            return _trafficLight.GetPermission("left");
         if (direction.x > 0)
-            _isAccelerating = _trafficLight.GetPermission("right");
+            return _trafficLight.GetPermission("right");
+        return true;
     }
 
-    private void OnTriggerExit2D(Collider2D other)
+    private bool CheckFrontCar()
     {
-        if (other.CompareTag("Car"))
+        // Raycast in front of the car to detect obstacles
+        RaycastHit2D hit = Physics2D.Raycast(
+            new Vector2(frontSensor.position.x, frontSensor.position.y),
+            direction,
+            detectionDistance,
+            obstacleLayer
+        );
+        if (!hit) return false;
+        if (hit.collider)
         {
-            _isAccelerating = true;
-            _collidingWithCar = false;
+            Debug.Log("DETECT CAR");
+            // An obstacle is detected
+            return true;
         }
+
+        return false;
     }
 }
