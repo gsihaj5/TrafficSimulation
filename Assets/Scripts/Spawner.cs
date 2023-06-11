@@ -8,7 +8,7 @@ public class Spawner : MonoBehaviour
     [SerializeField] private GameObject carPrefab;
     [SerializeField] private float interval;
     [SerializeField] private int carCount;
-    [SerializeField] private Vector2 direction;
+    [SerializeField] public Vector2 direction;
 
     private int spawnedCar = 0;
 
@@ -35,7 +35,14 @@ public class Spawner : MonoBehaviour
 
     private void Spawn()
     {
-        Object newCar = Instantiate(carPrefab, transform.position, new());
+        Object newCar = Instantiate(
+            carPrefab,
+            new Vector3(
+                transform.position.x, 
+                transform.position.y, 
+                -5f
+            ),
+            new());
         if (direction.x == -1)
         {
             newCar.GetComponent<Transform>().Rotate(0, 0, 90);

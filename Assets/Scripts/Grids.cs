@@ -1,0 +1,125 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Grids
+{
+    private Dictionary<int, List<int>> adjacencyList;
+    private int row_size, col_size;
+    private GameObject intersection_light_prefab;
+    private GameObject spawner_prefab;
+
+    // Start is called before the first frame update
+    public Grids(int row_size, int col_size, GameObject intersection_light, GameObject spawner_prefab)
+    {
+        this.row_size = row_size;
+        this.col_size = col_size;
+        this.intersection_light_prefab = intersection_light;
+        this.spawner_prefab = spawner_prefab;
+        adjacencyList = new Dictionary<int, List<int>>();
+
+        InitNodes();
+        InitSpawners();
+        InitEdgeNodes();
+
+    }
+
+    private void InitNodes()
+    {
+        for (int y = 0; y < row_size; y++)
+        {
+            for (int x = 0; x < col_size; x++)
+            {
+                AddNode(y + x);
+                Object.Instantiate(intersection_light_prefab, new Vector2(15 * x, 15 * y), Quaternion.identity);
+            }
+        }
+    }
+
+    private void InitSpawners()
+    {
+        for (int i = 0; i < col_size * 2; i++)
+        {
+            if (i < col_size)//bottom to top spawner
+                InstantiateSpawner(new Vector2(15 * i - .5f, -9), new Vector2(0, 1));
+            else//top to bottom spawner
+                InstantiateSpawner(new Vector2(15 * (i-col_size) + .5f, (row_size-1) * 15 + 9), new Vector2(0, -1));
+        }
+        for (int i = 0; i < row_size * 2; i++)
+        {
+            if (i < row_size)//left to right spawner
+                InstantiateSpawner(new Vector2(-9,15 * i + .5f), new Vector2(1, 0));
+            else//right to left
+                InstantiateSpawner(new Vector2((col_size-1) * 15 + 9,15 * (i-col_size) - .5f), new Vector2(-1, 0));
+        }
+    }
+
+    private void InstantiateSpawner(Vector2 position, Vector2 direction)
+    {
+        GameObject spawner_gameobject = Object.Instantiate(spawner_prefab, position, Quaternion.identity);
+        Spawner spawner = spawner_gameobject.GetComponent<Spawner>();
+        spawner.direction = direction;
+    }
+
+    private void InitEdgeNodes()
+    {
+        for (int i = 0; i < row_size; i++)
+        {
+            for (int j = 0; j < col_size; j++)
+            {
+                int currentNode = i * col_size + j;
+
+                if (i > 0)
+                {
+                    int topNode = (i - 1) * col_size + j;
+                    AddEdge(currentNode, topNode);
+                }
+
+                if (i < row_size - 1)
+                {
+                    int bottomNode = (i + 1) * col_size + j;
+                    AddEdge(currentNode, bottomNode);
+                }
+
+                if (j > 0)
+                {
+                    int leftNode = i * col_size + (j - 1);
+                    AddEdge(currentNode, leftNode);
+                }
+
+                if (j < col_size - 1)
+                {
+                    int rightNode = i * col_size + (j + 1);
+                    AddEdge(currentNode, rightNode);
+                }
+            }
+        }
+    }
+
+    public void AddNode(int node)
+    {
+        if (!adjacencyList.ContainsKey(node))
+        {
+            adjacencyList[node] = new List<int>();
+        }
+    }
+
+    public void AddEdge(int node1, int node2)
+    {
+        if (adjacencyList.ContainsKey(node1) && adjacencyList.ContainsKey(node2))
+        {
+            adjacencyList[node1].Add(node2);
+            adjacencyList[node2].Add(node1);
+        }
+    }
+
+    public List<int> GetNeighbors(int node)
+    {
+        if (adjacencyList.ContainsKey(node))
+        {
+            return adjacencyList[node];
+        }
+
+        return new List<int>();
+    }
+}
