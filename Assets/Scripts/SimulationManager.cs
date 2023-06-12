@@ -11,6 +11,7 @@ public class SimulationManager : MonoBehaviour
     private Grids grid;
     private float intervalReport = 5f;
     private float elapsedTime = 0;
+    private NeuralNetwork QEstimator;
 
     void Start()
     {
@@ -22,6 +23,10 @@ public class SimulationManager : MonoBehaviour
         int outputSize = 4;
         QNetwork qNetwork = new QNetwork(inputSize, outputSize);
         QNetwork targetQNetwork = new QNetwork(inputSize, outputSize);
+        targetQNetwork.weights = (float[,])qNetwork.weights.Clone();
+        targetQNetwork.biases = (float[])qNetwork.biases.Clone();
+
+        QEstimator = new NeuralNetwork(new[] { 2, 20, 2 }, .01f, 100, "Relu");
     }
 
     // Update is called once per frame
@@ -31,6 +36,7 @@ public class SimulationManager : MonoBehaviour
         if (elapsedTime > intervalReport)
         {
             CalculateSTMARL();
+            elapsedTime -= intervalReport;
         }
     }
 
@@ -41,8 +47,11 @@ public class SimulationManager : MonoBehaviour
         {
             Observer observer = traffic_light.GetComponentInChildren<Observer>();
             observer.computeLSTM();
+            float vin = observer.GetInputValue()[0];
+            float vout = observer.calculateVout();
+            float[] estimatedQValue = QEstimator.Process(new[] { vin, vout });
+            Debug.Log("estimated value");
+            Debug.Log(estimatedQValue);
         }
     }
-
-    
 }

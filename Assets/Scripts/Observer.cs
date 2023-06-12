@@ -16,15 +16,18 @@ public class Observer : MonoBehaviour
 
     private NeuralNetwork embeddingNN;
     private NeuralNetwork vInNN;
+    private NeuralNetwork vOutNN;
 
     private LSTM lstm;
-    private int LSTMInputSize = 2;
-    private int LSTMHiddenSize = 10;
+    private int LSTMInputSize = 1;
+    private int LSTMHiddenSize = 40;
     private int LSTMOutputSize = 1;
 
     private float currentInitValue = 0;
     private float prevNodeVector = 0;
     private float[] Vhat;
+
+    private float[] AttentionWeight;
 
 
     private void Start()
@@ -35,9 +38,22 @@ public class Observer : MonoBehaviour
         embeddingNN = new NeuralNetwork(networkShape, .01f, 100, "Relu");
 
         vInNN = new NeuralNetwork(new[] { 9, 20, 1 }, .01f, 100, "Relu");
+        vOutNN = new NeuralNetwork(new[] { 2, 20, 1 }, .01f, 100, "Relu");
 
         //initialize LSTM
         lstm = new LSTM(LSTMInputSize, LSTMHiddenSize, LSTMOutputSize);
+        double mean = 0.0;
+        double standardDeviation = 5.0;
+
+        //init attentionWeight
+        AttentionWeight = new float[4];
+        RandomNormal rand = new RandomNormal();
+        for (int i = 0; i < AttentionWeight.Length; i++)
+        {
+            //AttentionWeight[i] = (float)rand.Next(-100, 100) / 100f;
+            AttentionWeight[i] = (float)rand.NextNormal(mean, standardDeviation);
+            //AttentionWeight[i] = 0;
+        }
     }
 
     public int GetVehicleCount()
@@ -92,6 +108,63 @@ public class Observer : MonoBehaviour
             prevNodeVector
         };
     }
+
+    public float getVbar()
+    {
+        float[] selfVhat = GetVhat();
+
+
+        float sum = 0;
+        foreach (Observer observer in neighboringObserver)
+        {
+            float calcWeight = 0;
+            float[] neighborVhat = observer.GetVhat();
+            float[] concatVhat =
+            {
+                selfVhat[0],
+                selfVhat[1],
+                neighborVhat[0],
+                neighborVhat[1],
+            };
+            for (int i = 0; i < 4; i++)
+            {
+                calcWeight += AttentionWeight[i] * concatVhat[i];
+            }
+
+            sum += Mathf.Exp(EluActivation(calcWeight));
+        }
+
+        float vbar = 0;
+        foreach (Observer observer in neighboringObserver)
+        {
+            float calcWeight = 0;
+            float[] neighborVhat = observer.GetVhat();
+            float[] concatVhat =
+            {
+                selfVhat[0],
+                selfVhat[1],
+                neighborVhat[0],
+                neighborVhat[1],
+            };
+            for (int i = 0; i < 4; i++)
+            {
+                calcWeight += AttentionWeight[i] * concatVhat[i];
+            }
+
+            vbar += (Mathf.Exp(EluActivation(calcWeight)) / sum) * neighborVhat[0] * neighborVhat[1];
+        }
+
+        return vbar;
+    }
+
+    public float calculateVout()
+    {
+        float[] vhat = GetVhat();
+        float vout = vOutNN.Process(new[] { vhat[0], vhat[1], getVbar() })[0];
+        prevNodeVector = vout;
+        return vout;
+    }
+
 
     public float computeLSTM()
     {

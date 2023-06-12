@@ -1,4 +1,5 @@
 ﻿using System;
+using UnityEngine;
 
 public class LSTM
 {
@@ -22,7 +23,7 @@ public class LSTM
         InitializeBiases();
 
         hiddenState = new float[hiddenSize];
-        cellState = new float[hiddenSize];
+        cellState = new float[hiddenSize/4];
     }
 
     private void InitializeWeights()
@@ -35,7 +36,7 @@ public class LSTM
         biases = new float[hiddenSize];
     }
 
-    public float[] Calculate( float[] input)
+    public float[] Calculate(float[] input)
     {
         float[] concatInputHidden = ConcatenateArrays(input, hiddenState);
 
@@ -43,10 +44,12 @@ public class LSTM
         AddBiasesToVector(gates, biases);
         ApplySigmoidActivation(gates);
 
-        float[] inputGate = GetSliceFromVector(gates, 0, hiddenSize);
-        float[] forgetGate = GetSliceFromVector(gates, hiddenSize, 2 * hiddenSize);
-        float[] outputGate = GetSliceFromVector(gates, 2 * hiddenSize, 3 * hiddenSize);
-        float[] candidateCellState = GetSliceFromVector(gates, 3 * hiddenSize, 4 * hiddenSize);
+        int hiddenSizeChunk = hiddenSize / 4;
+
+        float[] inputGate = GetSliceFromVector(gates, 0, hiddenSizeChunk);
+        float[] forgetGate = GetSliceFromVector(gates, hiddenSizeChunk, 2 * hiddenSizeChunk);
+        float[] outputGate = GetSliceFromVector(gates, 2 * hiddenSizeChunk, 3 * hiddenSizeChunk);
+        float[] candidateCellState = GetSliceFromVector(gates, 3 * hiddenSizeChunk, 4 * hiddenSizeChunk);
 
         MultiplyVectorsElementwise(forgetGate, cellState);
         MultiplyVectorsElementwise(inputGate, candidateCellState);
@@ -56,7 +59,7 @@ public class LSTM
         MultiplyVectorsElementwise(outputGate, cellState);
         ApplyTanhActivation(hiddenState);
 
-        float[] output = MultiplyMatrixByVector(weights, hiddenState);
+        float[] output = MultiplyMatrixByVector(weights, concatInputHidden);
         AddBiasesToVector(output, biases);
         ApplySigmoidActivation(output);
 

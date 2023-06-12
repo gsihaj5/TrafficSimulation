@@ -4,8 +4,8 @@ public class QNetwork
 {
     private int inputSize;
     private int outputSize;
-    private float[,] weights;
-    private float[] biases;
+    public float[,] weights;
+    public float[] biases;
 
     public QNetwork(int inputSize, int outputSize)
     {
