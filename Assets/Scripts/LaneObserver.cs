@@ -40,4 +40,9 @@ public class LaneObserver : MonoBehaviour
     {
         return nn.Process(new[] { vehicleCount, AverageSpeed() })[0];
     }
+
+    public float[] GetObservation()
+    {
+        return new[] { vehicleCount, AverageSpeed() };
+    }
 }

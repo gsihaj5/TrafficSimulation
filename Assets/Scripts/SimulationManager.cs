@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,7 +14,6 @@ public class SimulationManager : MonoBehaviour
 
     void Start()
     {
-        
         //create environment
         grid = new Grids(3, 5, intersection_prefab, spawner_prefab);
 
@@ -30,7 +30,19 @@ public class SimulationManager : MonoBehaviour
         elapsedTime += Time.deltaTime;
         if (elapsedTime > intervalReport)
         {
+            CalculateSTMARL();
         }
     }
+
+    private void CalculateSTMARL()
+    {
+        Debug.Log("Calculatting STMARL");
+        foreach (TrafficLight traffic_light in grid.trafficLights)
+        {
+            Observer observer = traffic_light.GetComponentInChildren<Observer>();
+            observer.computeLSTM();
+        }
+    }
+
     
 }

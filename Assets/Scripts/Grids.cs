@@ -23,6 +23,14 @@ public class Grids
         InitNodes();
         InitSpawners();
         InitEdgeNodes();
+
+        int index = 0;
+        foreach (TrafficLight trafficLight in trafficLights)
+        {
+            Observer observer = trafficLight.GetComponentInChildren<Observer>();
+            observer.neighboringObserver = GetNeighbors(index);
+            index++;
+        }
     }
 
     private void InitNodes()
@@ -117,14 +125,22 @@ public class Grids
         }
     }
 
-    public List<int> GetNeighbors(int node)
+    public List<Observer> GetNeighbors(int node)
     {
         if (adjacencyList.ContainsKey(node))
         {
-            return adjacencyList[node];
+            List<int> neighborIndexes = adjacencyList[node];
+            List<Observer> neighborTrafficLights = new();
+
+            foreach (int neighborIndex in neighborIndexes)
+            {
+                neighborTrafficLights.Add(trafficLights[neighborIndex].GetComponentInChildren<Observer>());
+            }
+
+            return neighborTrafficLights;
         }
 
-        return new List<int>();
+        return new List<Observer>();
     }
 
     public void printAllTrafficParameter()
