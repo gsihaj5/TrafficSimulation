@@ -41,11 +41,17 @@ public class Car : MonoBehaviour
         }
     }
 
+    public float getVelocity()
+    {
+        return _rigidbody2D.velocity.magnitude;
+    }
+
     private void OnTriggerEnter2D(Collider2D col)
     {
         if (col.CompareTag("TrafficCollider"))
         {
-            _trafficLight = col.transform.parent.GetComponent<TrafficLight>();
+            Debug.Log("entering traffic collider");
+            _trafficLight = col.transform.parent.parent.GetComponent<TrafficLight>();
         }
     }
 

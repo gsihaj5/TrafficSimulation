@@ -5,7 +5,7 @@ using UnityEngine;
 public class Grids
 {
     private Dictionary<int, List<int>> adjacencyList;
-    private List<TrafficLight> trafficLights;
+    public List<TrafficLight> trafficLights;
     private int row_size, col_size;
     private GameObject intersection_light_prefab;
     private GameObject spawner_prefab;
@@ -23,7 +23,6 @@ public class Grids
         InitNodes();
         InitSpawners();
         InitEdgeNodes();
-
     }
 
     private void InitNodes()
@@ -33,7 +32,8 @@ public class Grids
             for (int x = 0; x < col_size; x++)
             {
                 AddNode(y + x);
-                GameObject traffic_gameobject = Object.Instantiate(intersection_light_prefab, new Vector2(15 * x, 15 * y), Quaternion.identity);
+                GameObject traffic_gameobject = Object.Instantiate(intersection_light_prefab,
+                    new Vector2(15 * x, 15 * y), Quaternion.identity);
                 trafficLights.Add(traffic_gameobject.GetComponent<TrafficLight>());
             }
         }
@@ -43,16 +43,17 @@ public class Grids
     {
         for (int i = 0; i < col_size * 2; i++)
         {
-            if (i < col_size)//bottom to top spawner
+            if (i < col_size) //bottom to top spawner
                 InstantiateSpawner(new Vector2(15 * i - .5f, -9), new Vector2(0, 1));
-            else//top to bottom spawner
+            else //top to bottom spawner
                 InstantiateSpawner(new Vector2(15 * (i - col_size) + .5f, (row_size - 1) * 15 + 9), new Vector2(0, -1));
         }
+
         for (int i = 0; i < row_size * 2; i++)
         {
-            if (i < row_size)//left to right spawner
+            if (i < row_size) //left to right spawner
                 InstantiateSpawner(new Vector2(-9, 15 * i + .5f), new Vector2(1, 0));
-            else//right to left
+            else //right to left
                 InstantiateSpawner(new Vector2((col_size - 1) * 15 + 9, 15 * (i - row_size) - .5f), new Vector2(-1, 0));
         }
     }
@@ -131,10 +132,9 @@ public class Grids
         Debug.Log("Report");
         foreach (TrafficLight traffic_light in trafficLights)
         {
-            Observer observer = traffic_light.GetComponent<Observer>();
-            Debug.Log(observer.vehicleCount);
-            
-
+            Observer observer = traffic_light.GetComponentInChildren<Observer>();
+            Debug.Log("vehicle count : " + observer.GetVehicleCount());
+            Debug.Log("average speed : " + observer.AverageSpeed());
         }
     }
 }
