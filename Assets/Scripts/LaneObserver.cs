@@ -5,6 +5,7 @@ using UnityEngine;
 public class LaneObserver : MonoBehaviour
 {
     public int vehicleCount = 0;
+    private List<Car> _cars = new();
 
     private void OnTriggerEnter2D(Collider2D col)
     {
@@ -21,5 +22,22 @@ public class LaneObserver : MonoBehaviour
         {
             vehicleCount--;
         }
+    }
+
+    public float AverageSpeed()
+    {
+        float speeds = 0;
+
+        foreach (Car car in _cars)
+        {
+            speeds += car.getVelocity();
+        }
+
+        return speeds / vehicleCount;
+    }
+
+    public float GetEmbbedObservation(NeuralNetwork nn)
+    {
+        return nn.Process(new[] { vehicleCount, AverageSpeed() })[0];
     }
 }

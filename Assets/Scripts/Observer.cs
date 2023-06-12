@@ -10,23 +10,14 @@ public class Observer : MonoBehaviour
     [SerializeField] private LaneObserver leftObserver;
     [SerializeField] private LaneObserver rightObserver;
 
-    private List<Car> _cars = new();
+    private NeuralNetwork nn;
 
-    private void OnTriggerEnter2D(Collider2D col)
+    private void Start()
     {
-        if (col.CompareTag("Car"))
-        {
-            Debug.Log("trigger large");
-            _cars.Add(col.gameObject.GetComponent<Car>());
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D col)
-    {
-        if (col.CompareTag("Car"))
-        {
-            _cars.Remove(col.gameObject.GetComponent<Car>());
-        }
+        // initial MLP for edgeEmbedding 
+        // 2 input is for vehicle count and avg speed
+        int[] networkShape = { 2, 20, 20, 2 };
+        nn = new NeuralNetwork(networkShape, .01f, 100, "Relu");
     }
 
     public int GetVehicleCount()
@@ -40,16 +31,14 @@ public class Observer : MonoBehaviour
         return new List<LaneObserver> { topObserver, leftObserver, bottomObserver, rightObserver };
     }
 
-    public float AverageSpeed()
+    public float GetNodeValue()
     {
-        int vehicleCount = GetVehicleCount();
-        float speeds = 0;
+        float sum = 0;
+        sum += topObserver.GetEmbbedObservation(nn);
+        sum += bottomObserver.GetEmbbedObservation(nn);
+        sum += leftObserver.GetEmbbedObservation(nn);
+        sum += rightObserver.GetEmbbedObservation(nn);
 
-        foreach (Car car in _cars)
-        {
-            speeds += car.getVelocity();
-        }
-
-        return speeds / vehicleCount;
+        return sum;
     }
 }

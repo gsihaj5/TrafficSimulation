@@ -49,6 +49,9 @@
      <Compile Include="Assets\Scripts\TrafficLight.cs" />
      <Compile Include="Assets\Scripts\Car.cs" />
      <Compile Include="Assets\Scripts\Grids.cs" />
+     <Compile Include="Assets\Scripts\NeuralNetwork\NeuralNetwork.cs" />
+     <Compile Include="Assets\Scripts\NeuralNetwork\Layer.cs" />
+     <Compile Include="Assets\Scripts\NeuralNetwork\RandomNormal.cs" />
      <Reference Include="UnityEngine">
      <HintPath>D:\UnityEditor\2021.3.11f1\Editor\Data\Managed\UnityEngine\UnityEngine.dll</HintPath>
      </Reference>

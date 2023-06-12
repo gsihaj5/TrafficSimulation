@@ -22,8 +22,6 @@ public class SimulationManager : MonoBehaviour
         int outputSize = 4;
         QNetwork qNetwork = new QNetwork(inputSize, outputSize);
         QNetwork targetQNetwork = new QNetwork(inputSize, outputSize);
-        
-        
     }
 
     // Update is called once per frame
@@ -32,7 +30,6 @@ public class SimulationManager : MonoBehaviour
         elapsedTime += Time.deltaTime;
         if (elapsedTime > intervalReport)
         {
-            grid.printAllTrafficParameter();
         }
     }
     

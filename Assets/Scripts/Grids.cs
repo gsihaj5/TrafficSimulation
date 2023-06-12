@@ -134,7 +134,6 @@ public class Grids
         {
             Observer observer = traffic_light.GetComponentInChildren<Observer>();
             Debug.Log("vehicle count : " + observer.GetVehicleCount());
-            Debug.Log("average speed : " + observer.AverageSpeed());
         }
     }
 }
