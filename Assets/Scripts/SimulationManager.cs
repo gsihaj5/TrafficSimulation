@@ -13,20 +13,15 @@ public class SimulationManager : MonoBehaviour
     private float elapsedTime = 0;
     private NeuralNetwork QEstimator;
 
+    private QNetwork _qNetwork;
+
     void Start()
     {
         //create environment
         grid = new Grids(3, 5, intersection_prefab, spawner_prefab);
 
         //initialize Q-Network and Target Q-Network
-        int inputSize = 10;
-        int outputSize = 4;
-        QNetwork qNetwork = new QNetwork(inputSize, outputSize);
-        QNetwork targetQNetwork = new QNetwork(inputSize, outputSize);
-        targetQNetwork.weights = (float[,])qNetwork.weights.Clone();
-        targetQNetwork.biases = (float[])qNetwork.biases.Clone();
-
-        QEstimator = new NeuralNetwork(new[] { 2, 20, 2 }, .01f, 100, "Relu");
+        _qNetwork = new QNetwork(2, 2, 40, .01f, 0);
     }
 
     // Update is called once per frame
@@ -49,9 +44,6 @@ public class SimulationManager : MonoBehaviour
             observer.computeLSTM();
             float vin = observer.GetInputValue()[0];
             float vout = observer.calculateVout();
-            float[] estimatedQValue = QEstimator.Process(new[] { vin, vout });
-            Debug.Log("estimated value");
-            Debug.Log(estimatedQValue);
         }
     }
 }

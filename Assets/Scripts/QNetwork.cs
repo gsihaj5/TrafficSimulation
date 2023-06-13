@@ -4,31 +4,32 @@ public class QNetwork
 {
     private int inputSize;
     private int outputSize;
+    private float hiddenSize;
+    private float learningRate;
+    private float discountFactor;
     public float[,] weights;
     public float[] biases;
 
-    public QNetwork(int inputSize, int outputSize)
+    private NeuralNetwork _neuralNetwork;
+
+    public QNetwork(int inputSize, int outputSize, int hiddenSize, float learningRate, float discountFactor)
     {
         this.inputSize = inputSize;
         this.outputSize = outputSize;
-        InitializeParameters();
+        this.hiddenSize = hiddenSize;
+        this.learningRate = learningRate;
+        this.discountFactor = discountFactor;
+
+        // Initialize the neural network
+        _neuralNetwork =
+            new NeuralNetwork(new[] { inputSize, hiddenSize, hiddenSize, hiddenSize, hiddenSize, outputSize },
+                learningRate, 100, "Relu");
     }
 
-    private void InitializeParameters()
+    public float[] getQValues(float[] state)
     {
-        weights = new float[outputSize, inputSize];
-        biases = new float[outputSize];
-
-        // Initialize weights and biases randomly or using a specific initialization method
-        Random random = new Random();
-        for (int i = 0; i < outputSize; i++)
-        {
-            for (int j = 0; j < inputSize; j++)
-            {
-                weights[i, j] = (float)random.NextDouble();
-            }
-
-            biases[i] = (float)random.NextDouble();
-        }
+        return _neuralNetwork.Process(state);
     }
+    
+    
 }

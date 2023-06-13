@@ -38,7 +38,7 @@ public class Observer : MonoBehaviour
         embeddingNN = new NeuralNetwork(networkShape, .01f, 100, "Relu");
 
         vInNN = new NeuralNetwork(new[] { 9, 20, 1 }, .01f, 100, "Relu");
-        vOutNN = new NeuralNetwork(new[] { 2, 20, 1 }, .01f, 100, "Relu");
+        vOutNN = new NeuralNetwork(new[] { 3, 20, 1 }, .01f, 100, "Relu");
 
         //initialize LSTM
         lstm = new LSTM(LSTMInputSize, LSTMHiddenSize, LSTMOutputSize);
