@@ -90,7 +90,11 @@ public class QNetwork
 
     public void calculateReward(Observer observer)
     {
-        if (firstEvaluation) return;
+        if (firstEvaluation)
+        {
+            firstEvaluation = false;
+            return;
+        }
 
         float queueWeight = -1f;
         float speedWeight = 1f;
