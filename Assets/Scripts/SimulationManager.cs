@@ -11,7 +11,6 @@ public class SimulationManager : MonoBehaviour
     private Grids grid;
     private float intervalReport = 5f;
     private float elapsedTime = 0;
-    private NeuralNetwork QEstimator;
 
     private QNetwork _qNetwork;
 
@@ -44,6 +43,12 @@ public class SimulationManager : MonoBehaviour
             observer.computeLSTM();
             float vin = observer.GetInputValue()[0];
             float vout = observer.calculateVout();
+            Debug.Log("inputs");
+            Debug.Log(vin);
+            Debug.Log(vout);
+            float[] estimatedQ = _qNetwork.getQValues(new[] { vin, vout });
+            if (double.IsNaN(estimatedQ[0])) estimatedQ[0] = 0;
+            if (double.IsNaN(estimatedQ[1])) estimatedQ[1] = 0;
         }
     }
 }

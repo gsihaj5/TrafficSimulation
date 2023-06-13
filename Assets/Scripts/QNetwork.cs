@@ -23,7 +23,7 @@ public class QNetwork
         // Initialize the neural network
         _neuralNetwork =
             new NeuralNetwork(new[] { inputSize, hiddenSize, hiddenSize, hiddenSize, hiddenSize, outputSize },
-                learningRate, 100, "Relu");
+                learningRate, 100, "Sigmoid");
     }
 
     public float[] getQValues(float[] state)

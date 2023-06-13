@@ -160,7 +160,13 @@ public class Observer : MonoBehaviour
     public float calculateVout()
     {
         float[] vhat = GetVhat();
-        float vout = vOutNN.Process(new[] { vhat[0], vhat[1], getVbar() })[0];
+        float vbar = getVbar();
+        Debug.Log("Vhat");
+        if (Double.IsNaN(vhat[0])) vhat[0] = 0;
+        if (Double.IsNaN(vhat[1])) vhat[1] = 0;
+        if (Double.IsNaN(vbar)) vbar = 0;
+
+        float vout = vOutNN.Process(new[] { vhat[0], vhat[1], vbar })[0];
         prevNodeVector = vout;
         return vout;
     }

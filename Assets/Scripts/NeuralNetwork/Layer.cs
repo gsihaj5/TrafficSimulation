@@ -48,7 +48,7 @@ public class Layer
 
         RandomNormal rand = new RandomNormal();
         double mean = 0.0;
-        double standardDeviation = 5.0;
+        double standardDeviation = 1.0;
 
         //init bias
         for (int i = 0; i < biasesArray.Length; i++)
