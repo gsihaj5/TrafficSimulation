@@ -21,7 +21,7 @@ public class SimulationManager : MonoBehaviour
     void Start()
     {
         //create environment
-        grid = new Grids(4, 4, intersection_prefab, spawner_prefab);
+        grid = new Grids(3, 5, intersection_prefab, spawner_prefab);
 
         //initialize Q-Network and Target Q-Network
         _qNetwork = new QNetwork(2, 2, 40, .01f, 0);
@@ -34,7 +34,7 @@ public class SimulationManager : MonoBehaviour
         elapsedEvaluation += Time.deltaTime;
         if (elapsedTime > intervalReport)
         {
-            // CalculateSTMARL();
+            CalculateSTMARL();
             elapsedTime -= intervalReport;
         }
 

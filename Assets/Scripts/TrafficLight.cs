@@ -37,7 +37,6 @@ public class TrafficLight : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        UpdateForFixedInterval();
         UpdateColor(LightUp, _top);
         UpdateColor(LightBottom, _bottom);
         UpdateColor(LightLeft, _left);
