@@ -62,6 +62,15 @@ public class Observer : MonoBehaviour
                rightObserver.vehicleCount;
     }
 
+    public float GetAverageSpeed()
+    {
+        return (topObserver.AverageSpeed() * topObserver.vehicleCount +
+                leftObserver.AverageSpeed() * leftObserver.vehicleCount +
+                bottomObserver.AverageSpeed() * bottomObserver.vehicleCount +
+                rightObserver.AverageSpeed() * rightObserver.vehicleCount) / GetVehicleCount();
+    }
+
+
     public List<LaneObserver> GetLaneObservers()
     {
         return new List<LaneObserver> { topObserver, leftObserver, bottomObserver, rightObserver };

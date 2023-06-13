@@ -32,18 +32,20 @@ public class TrafficLight : MonoBehaviour
         // 2 input is for vehicle count and avg speed
         int[] networkShape = { 2, 20, 20, 2 };
         NeuralNetwork nn = new NeuralNetwork(networkShape, .01f, 100, "Relu");
-        
     }
 
     // Update is called once per frame
     void Update()
     {
-        elapsedTime += Time.deltaTime;
-
         UpdateColor(LightUp, _top);
         UpdateColor(LightBottom, _bottom);
         UpdateColor(LightLeft, _left);
         UpdateColor(LightRight, _right);
+    }
+
+    private void UpdateForFixedInterval()
+    {
+        elapsedTime += Time.deltaTime;
         if (elapsedTime > interval)
         {
             if (isHorizontal)
@@ -81,5 +83,23 @@ public class TrafficLight : MonoBehaviour
         if ("right" == direction) return _right;
 
         return false;
+    }
+
+    public void doAction(int actionIndex)
+    {
+        if (actionIndex == 0)
+        {
+            _top = false;
+            _bottom = false;
+            _left = true;
+            _right = true;
+        }
+        else
+        {
+            _top = true;
+            _bottom = true;
+            _left = false;
+            _right = false;
+        }
     }
 }
