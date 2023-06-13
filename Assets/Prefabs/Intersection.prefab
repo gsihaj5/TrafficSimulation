@@ -705,7 +705,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   intervalHorizontal: 5
-  intervalVertical: 3
+  intervalVertical: 5
   LightBottom: {fileID: 4119015030961336924}
   LightUp: {fileID: 923594409342839387}
   LightLeft: {fileID: 3257020171752450353}
@@ -1370,6 +1370,7 @@ MonoBehaviour:
   bottomObserver: {fileID: 7799970281350474210}
   leftObserver: {fileID: 8031680270993341688}
   rightObserver: {fileID: 6607258087024369684}
+  neighboringObserver: []
 --- !u!61 &5948419797179011732
 BoxCollider2D:
   m_ObjectHideFlags: 0

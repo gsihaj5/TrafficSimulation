@@ -53,6 +53,12 @@ public class Car : MonoBehaviour
         {
             _trafficLight = col.transform.parent.parent.GetComponent<TrafficLight>();
         }
+
+        if (col.CompareTag("ExitCollider"))
+        {
+            Destroy(gameObject);
+            ExitCollider.successCar++;
+        }
     }
 
     private void OnTriggerExit2D(Collider2D col)
