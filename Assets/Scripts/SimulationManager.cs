@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class SimulationManager : MonoBehaviour
 {
+    [SerializeField][Range(1f,5)] private float timeScale;
     [SerializeField] private GameObject intersection_prefab;
     [SerializeField] private GameObject spawner_prefab;
     [SerializeField] private ExitCollider _exitCollider;
@@ -16,7 +17,6 @@ public class SimulationManager : MonoBehaviour
     private float evaluationTime = 25f;
     private float elapsedEvaluation = 0;
 
-    private QNetwork _qNetwork;
 
     void Start()
     {
@@ -24,12 +24,12 @@ public class SimulationManager : MonoBehaviour
         grid = new Grids(3, 5, intersection_prefab, spawner_prefab);
 
         //initialize Q-Network and Target Q-Network
-        _qNetwork = new QNetwork(2, 2, 40, .01f, 0);
     }
 
     // Update is called once per frame
     void Update()
     {
+        Time.timeScale = timeScale;
         elapsedTime += Time.deltaTime;
         elapsedEvaluation += Time.deltaTime;
         if (elapsedTime > intervalReport)
@@ -55,8 +55,8 @@ public class SimulationManager : MonoBehaviour
             observer.computeLSTM();
             float vin = observer.GetInputValue()[0];
             float vout = observer.calculateVout();
-            _qNetwork.calculateReward(observer);
-            float action = _qNetwork.getAction(vin, vout);
+            observer.qNetwork.calculateReward(observer); // estimated reward 
+            float action = observer.qNetwork.getAction(vin, vout);
 
             traffic_light.doAction((int)action);
         }

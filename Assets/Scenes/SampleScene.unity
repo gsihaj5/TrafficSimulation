@@ -367,6 +367,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42d10407ee0c0e5429c11ef392a0531f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  timeScale: 2.09
   intersection_prefab: {fileID: 5740860830150022646, guid: 05d2e6472e0198f4e9f55321fefb9303, type: 3}
   spawner_prefab: {fileID: 6986560798961415638, guid: 5b52408a179563e44a76ab102a656779, type: 3}
   _exitCollider: {fileID: 1775109612}

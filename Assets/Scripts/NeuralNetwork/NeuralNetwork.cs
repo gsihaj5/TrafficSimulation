@@ -1,3 +1,5 @@
+using UnityEngine;
+
 public class NeuralNetwork
 {
     public Layer[] layers;
@@ -60,6 +62,7 @@ public class NeuralNetwork
 
         if (learning_index == learning_batch)
         {
+            Debug.Log("updating weight");
             UpdateWeight();
             learning_index = 0;
         }
