@@ -31,7 +31,6 @@ public class TrafficLight : MonoBehaviour
         // initial MLP for edgeEmbedding 
         // 2 input is for vehicle count and avg speed
         int[] networkShape = { 2, 20, 20, 2 };
-        NeuralNetwork nn = new NeuralNetwork(networkShape, .01f, 100, "Relu");
     }
 
     // Update is called once per frame

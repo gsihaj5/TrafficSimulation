@@ -11,7 +11,7 @@ public class SimulationManager : MonoBehaviour
     [SerializeField] private ExitCollider _exitCollider;
 
     private Grids grid;
-    private float intervalReport = 1f;
+    private float intervalReport = .1f;
     private float elapsedTime = 0;
 
     private float evaluationTime = 25f;
@@ -21,7 +21,7 @@ public class SimulationManager : MonoBehaviour
     void Start()
     {
         //create environment
-        grid = new Grids(3, 5, intersection_prefab, spawner_prefab);
+        grid = new Grids(2, 2, intersection_prefab, spawner_prefab);
 
         //initialize Q-Network and Target Q-Network
     }
@@ -52,11 +52,14 @@ public class SimulationManager : MonoBehaviour
         foreach (TrafficLight traffic_light in grid.trafficLights)
         {
             Observer observer = traffic_light.GetComponentInChildren<Observer>();
-            observer.computeLSTM();
+           
             float vin = observer.GetInputValue()[0];
-            float vout = observer.calculateVout();
+            float vout =  observer.computeLSTM(observer.calculateRelationReasoning());
+
             observer.qNetwork.calculateReward(observer); // estimated reward 
             float action = observer.qNetwork.getAction(vin, vout);
+
+            observer.Train();
 
             traffic_light.doAction((int)action);
         }

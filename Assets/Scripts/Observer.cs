@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = System.Random;
 
 public class Observer : MonoBehaviour
 {
@@ -18,29 +19,32 @@ public class Observer : MonoBehaviour
     private NeuralNetwork vInNN;
     private NeuralNetwork vOutNN;
     public QNetwork qNetwork;
+    public QNetwork targetQNetwork;
 
     private LSTM lstm;
     private int LSTMInputSize = 1;
     private int LSTMHiddenSize = 40;
     private int LSTMOutputSize = 1;
+    private int updateTargetCounter = 0;
+    private int updateTargetBatch = 25;
 
     private float currentInitValue = 0;
-    private float prevNodeVector = 0;
+    private float prevRelationReasoning = 0;
     private float[] Vhat;
 
     private float[] AttentionWeight;
-
 
     private void Start()
     {
         // initial MLP for edgeEmbedding 
         // 2 input is for vehicle count and avg speed
-        int[] networkShape = { 2, 20, 20, 2 };
-        embeddingNN = new NeuralNetwork(networkShape, .01f, 100, "Relu");
+        embeddingNN = new NeuralNetwork(new[] { 20, 20, 20, 1 }, .01f, 100, "Relu");
 
         vInNN = new NeuralNetwork(new[] { 9, 20, 1 }, .01f, 100, "Relu");
         vOutNN = new NeuralNetwork(new[] { 3, 20, 1 }, .01f, 100, "Relu");
-        qNetwork = new QNetwork(2, 2, 40, .01f, 0);
+        qNetwork = new QNetwork(2, 2, 40, .01f, 0.99f);
+        targetQNetwork = new QNetwork(2, 2, 40, .01f, 0);
+        targetQNetwork.copyWeights(qNetwork);
 
         //initialize LSTM
         lstm = new LSTM(LSTMInputSize, LSTMHiddenSize, LSTMOutputSize);
@@ -80,13 +84,34 @@ public class Observer : MonoBehaviour
 
     public float GetEmbedNodeValue()
     {
-        float sum = 0;
-        sum += topObserver.GetEmbbedObservation(embeddingNN);
-        sum += bottomObserver.GetEmbbedObservation(embeddingNN);
-        sum += leftObserver.GetEmbbedObservation(embeddingNN);
-        sum += rightObserver.GetEmbbedObservation(embeddingNN);
+        float[] observations = {
+            //top
+            topObserver.GetObservation()[0],
+            topObserver.GetObservation()[1],
+            0,
+            0,
+            0,
+            //left
+            0,
+            leftObserver.GetObservation()[0],
+            leftObserver.GetObservation()[1],
+            0,
+            0,
+            //bottom
+            0,
+            0,
+            rightObserver.GetObservation()[0],
+            rightObserver.GetObservation()[1],
+            0,
+            //right
+            0,
+            0,
+            0,
+            rightObserver.GetObservation()[0],
+            rightObserver.GetObservation()[1],
+        };
 
-        return sum;
+        return embeddingNN.Process(observations)[0];
     }
 
     public float[] GetInputValue()
@@ -116,7 +141,7 @@ public class Observer : MonoBehaviour
         return new[]
         {
             GetInputValue()[0],
-            prevNodeVector
+            prevRelationReasoning
         };
     }
 
@@ -168,7 +193,7 @@ public class Observer : MonoBehaviour
         return vbar;
     }
 
-    public float calculateVout()
+    public float[] calculateRelationReasoning()
     {
         float[] vhat = GetVhat();
         float vbar = getVbar();
@@ -177,15 +202,15 @@ public class Observer : MonoBehaviour
         if (Double.IsNaN(vhat[1])) vhat[1] = 0;
         if (Double.IsNaN(vbar)) vbar = 0;
 
-        float vout = vOutNN.Process(new[] { vhat[0], vhat[1], vbar })[0];
-        prevNodeVector = vout;
-        return vout;
+        float[] relationReasoning = vOutNN.Process(new[] { vhat[0], vhat[1], vbar });
+        prevRelationReasoning = relationReasoning[0];
+        return relationReasoning;
     }
 
 
-    public float computeLSTM()
+    public float computeLSTM(float[] value)
     {
-        return lstm.Calculate(GetInputValue())[0];
+        return lstm.Calculate(value)[0];
     }
 
     private float EluActivation(float x)
@@ -196,5 +221,35 @@ public class Observer : MonoBehaviour
         }
 
         return 1 * (MathF.Exp(x) - 1);
+    }
+
+    public void Train()
+    {
+        List<Transition> minibatch = qNetwork.getRandomSample();
+
+        if (minibatch.Count <= 0) return;
+        Debug.Log("TRAINING");
+
+        minibatch.ForEach(delegate (Transition transition)
+        {
+            float[] currentQs = qNetwork.getQs(transition.state);
+            float[] newQs = targetQNetwork.getQs(transition.newState);
+
+            float reward = qNetwork.getReward(this) + qNetwork.discountFactor * MathF.Max(newQs[0], newQs[1]);
+
+            float[] expectedOutput;
+            if (transition.action == 0)
+                expectedOutput = new []{ reward, currentQs[1]};
+            else
+                expectedOutput = new []{ currentQs[0], reward};
+
+            qNetwork.trainModel(expectedOutput, transition.state);
+        });
+        updateTargetCounter++;
+
+        if(updateTargetCounter>updateTargetBatch){
+            updateTargetCounter = 0;
+            targetQNetwork.copyWeights(qNetwork);
+        }
     }
 }
