@@ -84,6 +84,10 @@ public class TrafficLight : MonoBehaviour
         return false;
     }
 
+    public void RESET(){
+
+    }
+
     public void doAction(int actionIndex)
     {
         if (actionIndex == 0)

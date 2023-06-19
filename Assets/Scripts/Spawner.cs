@@ -33,6 +33,10 @@ public class Spawner : MonoBehaviour
         }
     }
 
+    public void RESET(){
+        spawnedCar = 0;
+    }
+
     private void Spawn()
     {
         Object newCar = Instantiate(

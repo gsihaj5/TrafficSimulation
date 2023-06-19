@@ -56,6 +56,10 @@ public class QNetwork
         replay_memory.Add(new Transition(latestState, latestAction, reward, newState));
     }
 
+    public void RESET_REPLAY_MEMORY(){
+        replay_memory.Clear();
+    }
+
     public float getReward(Observer observer)
     {
         float queueWeight = -1f;
@@ -83,7 +87,10 @@ public class QNetwork
 
         Random random = new Random();
         int action = 0;
-        if (random.Next(0, 100) > 75)
+        float epsilon = 99 * (100/replay_memory.Count);
+
+        if(epsilon < 30) epsilon = 60;
+        if (random.Next(0, 101) > epsilon)
         {
             Debug.Log("Exploit");
             //get MAX

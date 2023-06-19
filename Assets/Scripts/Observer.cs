@@ -223,6 +223,10 @@ public class Observer : MonoBehaviour
         return 1 * (MathF.Exp(x) - 1);
     }
 
+    public void RESET(){
+        qNetwork.RESET_REPLAY_MEMORY();
+    }
+
     public void Train()
     {
         List<Transition> minibatch = qNetwork.getRandomSample();

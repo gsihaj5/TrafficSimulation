@@ -6,6 +6,7 @@ public class Grids
 {
     private Dictionary<int, List<int>> adjacencyList;
     public List<TrafficLight> trafficLights;
+    private List<Spawner> spawners;
     private int row_size, col_size;
     private GameObject intersection_light_prefab;
     private GameObject spawner_prefab;
@@ -19,6 +20,7 @@ public class Grids
         this.spawner_prefab = spawner_prefab;
         adjacencyList = new Dictionary<int, List<int>>();
         trafficLights = new List<TrafficLight>();
+        spawners = new List<Spawner>();
 
         InitNodes();
         InitSpawners();
@@ -49,28 +51,46 @@ public class Grids
 
     private void InitSpawners()
     {
+        Spawner spawner;
         for (int i = 0; i < col_size * 2; i++)
         {
             if (i < col_size) //bottom to top spawner
-                InstantiateSpawner(new Vector2(15 * i - .5f, -9), new Vector2(0, 1));
+                spawner = InstantiateSpawner(new Vector2(15 * i - .5f, -9), new Vector2(0, 1));
             else //top to bottom spawner
-                InstantiateSpawner(new Vector2(15 * (i - col_size) + .5f, (row_size - 1) * 15 + 9), new Vector2(0, -1));
+                spawner = InstantiateSpawner(new Vector2(15 * (i - col_size) + .5f, (row_size - 1) * 15 + 9), new Vector2(0, -1));
+            spawners.Add(spawner);
         }
 
         for (int i = 0; i < row_size * 2; i++)
         {
             if (i < row_size) //left to right spawner
-                InstantiateSpawner(new Vector2(-9, 15 * i + .5f), new Vector2(1, 0));
+                spawner = InstantiateSpawner(new Vector2(-9, 15 * i + .5f), new Vector2(1, 0));
             else //right to left
-                InstantiateSpawner(new Vector2((col_size - 1) * 15 + 9, 15 * (i - row_size) - .5f), new Vector2(-1, 0));
+                spawner = InstantiateSpawner(new Vector2((col_size - 1) * 15 + 9, 15 * (i - row_size) - .5f), new Vector2(-1, 0));
+            spawners.Add(spawner);
         }
+
     }
 
-    private void InstantiateSpawner(Vector2 position, Vector2 direction)
+    public void RESET()
+    {
+        spawners.ForEach(delegate (Spawner spawner)
+        {
+            spawner.RESET();
+        });
+        trafficLights.ForEach(delegate (TrafficLight trafficLight)
+        {
+            Observer observer =trafficLight.GetComponentInChildren<Observer>();
+            observer.RESET();
+        });
+    }
+
+    private Spawner InstantiateSpawner(Vector2 position, Vector2 direction)
     {
         GameObject spawner_gameobject = Object.Instantiate(spawner_prefab, position, Quaternion.identity);
         Spawner spawner = spawner_gameobject.GetComponent<Spawner>();
         spawner.direction = direction;
+        return spawner;
     }
 
     private void InitEdgeNodes()
